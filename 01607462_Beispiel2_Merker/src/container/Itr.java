@@ -13,17 +13,13 @@ public class Itr<E> extends Object implements Iterator<E>{
 	@Override
 	public E next(){
 		IContainerElement<E> ret = this.next;
-		if(this.next.getNextElement() != null) {
-			this.next = this.next.getNextElement();
-			return (E) ret;
-		} else {
-			return null;
-		}
+		this.next = this.next.getNextElement();
+		return (E) ret;
 	}
 
 	@Override
 	public boolean hasNext() {
-		return (this.next.getNextElement() != null) ? true : false;
+		return (this.next != null) ? true : false;
 	}
 	
 	public void remove() throws UnsupportedOperationException {
