@@ -1,5 +1,6 @@
 package container;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
@@ -16,12 +17,37 @@ public class Container<E> extends Object implements Collection<E>, ISearchableBy
 
 	@Override
 	public Collection<E> searchByFilter(ISearchFilter filter, Object compareObject) {
-		return null;
+		Collection<E> ret = new ArrayList<E>();
+		if(this.isEmpty())
+			return ret;
+		
+		IContainerElement<E> it = this.firstElement;
+		while(it.hasNextElement()) {
+			if(filter.searchFilterFunction(it, compareObject))
+				ret.add(it.getData());
+			
+			it = it.getNextElement();
+		}
+		
+		return ret;
 	}
 
 	@Override
 	public int size() {
-		return 0;
+		
+		if(this.isEmpty())
+			return 0;
+		
+		IContainerElement<E> head = this.firstElement;
+		int size = 1;
+		
+		while(head.hasNextElement()) {
+			head = head.getNextElement();
+			size++;
+		}
+		
+		return (size > Integer.MAX_VALUE) ? Integer.MAX_VALUE : size;
+		
 	}
 
 	@Override
@@ -51,27 +77,19 @@ public class Container<E> extends Object implements Collection<E>, ISearchableBy
 	}
 
 	@Override
-	public Object[] toArray() {
-		return null;
+	public Object[] toArray() throws UnsupportedOperationException {
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public <T> T[] toArray(T[] a) {
-		return null;
+	public <T> T[] toArray(T[] a) throws UnsupportedOperationException {
+		throw new UnsupportedOperationException();
 	}
 	
 	public E get(int index) throws IndexOutOfBoundsException {
-		// get list length
-		IContainerElement<E> head = this.firstElement;
 		IContainerElement<E> search = this.firstElement;
-		int size = 0;
-		
-		while(head.hasNextElement()) {
-			head = head.getNextElement();
-			size++;
-		}
-		size++;
-		System.out.println("Size: " + size);
+		int size = this.size();
+
 		if(index < 0 || index > size-1)
 			throw new IndexOutOfBoundsException();
 		
@@ -94,34 +112,41 @@ public class Container<E> extends Object implements Collection<E>, ISearchableBy
 		if(element.getData().equals(null))
 			throw new NullPointerException();
 		
-		if(element.getData().equals(this.firstElement.getData()))
-			return false;
-		
-		IContainerElement<E> next = this.firstElement;
-		
-		while(next.hasNextElement()) {
-			if(next.getData().equals(element.getData())) {
-				return false;
-			}
-			next = next.getNextElement();
-		}
-		// check last position
-		if(next.getData().equals(element.getData())) {
-			return false;
-		}
-		// e not in list --> add
 		IContainerElement<E> last = this.firstElement;
 		while(last.hasNextElement())
 			last = last.getNextElement();
-		ContainerElement<E> el = new ContainerElement<E>(e); // new element
-		el.setNextElement(null);
-		last.setNextElement(el);
+		
+		element.setNextElement(null);
+		last.setNextElement(element);
 		return true;
 		
 	}
 
 	@Override
 	public boolean remove(Object o) {
+		if(o == null)
+			return false;
+		
+		IContainerElement<E> itr = this.firstElement;
+		
+		if(o.equals(itr.getData())) {
+			// set the first element to the next element. let garbage collection handle destruction
+			this.firstElement = this.firstElement.getNextElement();
+			return true;
+		}
+		
+		while(itr.hasNextElement()) {
+			IContainerElement<E> next = itr.getNextElement();
+			if(next != null) {
+				if(o.equals(next.getData())) {
+					itr.setNextElement(next.getNextElement());
+					next.setNextElement(null);
+					return true;
+				}
+			}
+			itr = itr.getNextElement();
+		}
+		
 		return false;
 	}
 
@@ -219,20 +244,32 @@ public class Container<E> extends Object implements Collection<E>, ISearchableBy
 
 	@Override
 	public boolean removeAll(Collection<?> c) {
-		return false;
+		if(c.isEmpty())
+			return false;
+		
+		if(c instanceof Container) {
+			c.clear();
+			return true;
+		} else {
+			return c.removeAll(c);
+		}
 	}
 
 	@Override
-	public boolean retainAll(Collection<?> c) {
-		return false;
+	public boolean retainAll(Collection<?> c) throws UnsupportedOperationException {
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	public void clear() {	
 		// just delete the firstElement
-		// reference will be lost, automatic garbage collection will delete all nodes
+		// reference will be lost naturally. garbage collection will delete all nodes
 		this.firstElement = null;
 		
+	}
+	
+	public String toString() {
+		return this.getClass().getName() + '@' + Integer.toHexString(hashCode());
 	}
 
 }
