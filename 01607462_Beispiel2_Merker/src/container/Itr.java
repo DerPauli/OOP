@@ -14,7 +14,7 @@ public class Itr<E> extends Object implements Iterator<E>{
 	public E next(){
 		IContainerElement<E> ret = this.next;
 		this.next = this.next.getNextElement();
-		return (E) ret;
+		return (ret.getData() == null) ? null : ret.getData();
 	}
 
 	@Override
