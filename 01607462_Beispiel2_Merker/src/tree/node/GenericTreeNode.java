@@ -1,6 +1,5 @@
 package tree.node;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
 import container.Container;
@@ -19,8 +18,21 @@ public class GenericTreeNode<NODETYPE> extends Object implements ITreeNode<NODET
 	
 	@Override
 	public Collection<ITreeNode<NODETYPE>> searchByFilter(ISearchFilter filter, Object compareObject) {
-		// TODO Auto-generated method stub
-		return null;
+		Collection<ITreeNode<NODETYPE>> ret = new Container<ITreeNode<NODETYPE>>();
+		
+		if(filter.searchFilterFunction(this, compareObject) ||
+				filter.searchFilterFunction(this.nodeValue(), compareObject)) {
+			ret.add(this);
+		}
+		
+		for(ITreeNode<NODETYPE> node : this.getChildren()) {
+			if(filter.searchFilterFunction(node, compareObject) ||
+					filter.searchFilterFunction(node.nodeValue(), compareObject)) {
+				if(!ret.contains(node))
+					ret.add(node);
+			}
+		}
+		return ret;
 	}
 
 	@Override
@@ -51,9 +63,7 @@ public class GenericTreeNode<NODETYPE> extends Object implements ITreeNode<NODET
 		Collection<ITreeNode<NODETYPE>> curr = this.getChildren();
 		
 		for(ITreeNode<NODETYPE> child : curr) {
-			while(!child.isLeaf()) {
-				this.findNodeByValue(searchValue);
-			}
+			return child.findNodeByValue(searchValue);
 		}
 		return null;
 	}
@@ -66,9 +76,7 @@ public class GenericTreeNode<NODETYPE> extends Object implements ITreeNode<NODET
 		Collection<ITreeNode<NODETYPE>> curr = this.getChildren();
 		
 		for(ITreeNode<NODETYPE> child : curr) {
-			while(!child.isLeaf()) {
-				this.findNodeByNode(searchNode);
-			}
+			return child.findNodeByNode(searchNode);
 		}
 		return null;
 	}
@@ -86,14 +94,34 @@ public class GenericTreeNode<NODETYPE> extends Object implements ITreeNode<NODET
 
 	@Override
 	public String generateConsoleView(String spacer, String preamble) {
-		// maybe ask michael
-		return null;
+	    String ret;
+	    if(this.isLeaf()) {
+	      return "\n" + preamble + "-" + this.getLabel() + " " + this.nodeValue();
+	    }
+	    ret = "\n" + preamble + "+" + this.getLabel() + " " + this.nodeValue();
+	    
+	    for(ITreeNode<NODETYPE> element: this.getChildren()) {
+	      ret += element.generateConsoleView(spacer, preamble + spacer);
+	    }
+	    return ret;
+		
+	}
+	
+	public String toString() {
+		return this.getClass().getName() + '@' + Integer.toHexString(this.hashCode());
 	}
 
 	@Override
 	public ITreeNode<NODETYPE> deepCopy() {
-		// TODO Auto-generated method stub
-		return null;
+		GenericTreeNode<NODETYPE> ret = new GenericTreeNode<NODETYPE>(this.getLabel(), this.nodeValue());
+		Collection<ITreeNode<NODETYPE>> newChilds = new Container<ITreeNode<NODETYPE>>();
+		
+		for(ITreeNode<NODETYPE> node : this.getChildren()) {
+			newChilds.add(node.deepCopy());
+		}
+		
+		ret.children = newChilds;
+		return ret;
 	}
 
 }
