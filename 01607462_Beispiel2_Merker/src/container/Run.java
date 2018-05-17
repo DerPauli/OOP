@@ -50,7 +50,6 @@ public class Run {
 			System.out.println(itr.next());
 		}
 		
-		// TODO: test filter functions with IProducts
 		Collection<Number> num = cont.searchByFilter(filt, 12);
 		
 		System.out.println(num.size());
