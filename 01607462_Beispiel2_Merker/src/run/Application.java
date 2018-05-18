@@ -30,11 +30,6 @@ public class Application {
 		
 		prods.addAll(meta);
 		
-		Iterator<IProduct> itr = prods.iterator();
-		
-//		while(itr.hasNext()) {
-//			System.out.println("Item: " + itr.next());
-//		}
 		
 		/***
 		 * TREE SECTION
@@ -83,8 +78,8 @@ public class Application {
 		for(ITreeNode<Number> node : numTree.getRoot().getChildren()) {
 			System.out.println(node.nodeValue());
 		}
-		//System.out.println(numTree.generateConsoleView("_"));
-		System.out.println(numTree.getRoot().generateConsoleView("**", "__"));
+		System.out.println(numTree.generateConsoleView("_"));
+		System.out.println(numTree.getRoot().generateConsoleView("_", "__"));
 	}
 
 }

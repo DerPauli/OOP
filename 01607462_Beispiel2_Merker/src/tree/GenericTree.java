@@ -45,24 +45,9 @@ public class GenericTree<TREETYPE> extends Object implements ITree<TREETYPE> {
 			return root.findNodeByValue(searchValue);
 	}
 
-	// TODO: non-recursive console view ?
 	@Override
 	public String generateConsoleView(String spacer) {
-		if(this.getRoot() != null) {
-			String ret = new String("");
-			
-			if(this.getRoot().isLeaf()) {
-				return spacer + this.getRoot().nodeValue() + '\n';
-			} else {
-				for(ITreeNode<TREETYPE> child : this.getRoot().getChildren()) {
-					GenericTree<TREETYPE> node = new GenericTree<TREETYPE>(child);
-					ret += spacer + node.generateConsoleView(spacer);
-				}
-			}
-			return this.getRoot().nodeValue().toString() + '\n' + ret;
-			
-		} else 
-			return new String("");
+		return this.getRoot().generateConsoleView(spacer, "");
 	}
 
 	@Override
