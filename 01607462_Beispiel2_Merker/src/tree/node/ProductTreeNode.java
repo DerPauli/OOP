@@ -20,11 +20,15 @@ public class ProductTreeNode extends GenericTreeNode<IProduct> {
 	}
 	
 	public ProductTreeNode(Product value) {
-		super(value.getName(), value);
+		super(checkNotNull(value), value);
 		this.initialize(value);
 	}
 	private ProductTreeNode(JointProduct value) {
 		super(value.getName(), value);
+	}
+	
+	private static String checkNotNull(IProduct prod) {
+		return (prod == null) ? "null" : prod.getName();
 	}
 	
 	private void initialize(IProduct item) {
@@ -40,7 +44,14 @@ public class ProductTreeNode extends GenericTreeNode<IProduct> {
 	}
 	
 	public ProductTreeNode deepCopy() {
-		return (ProductTreeNode) super.deepCopy();
+		ProductTreeNode ret = new ProductTreeNode(this.getLabel(), this.nodeValue());
+		Collection<ProductTreeNode> children = new Container<ProductTreeNode>();
+		
+		for(ITreeNode<IProduct> node : super.getChildren()) {
+			children.add((ProductTreeNode) node.deepCopy());
+		}
+		ret.getChildren().addAll(children);
+		return ret;
 	}
 
 }

@@ -61,17 +61,22 @@ public class Container<E> extends Object implements Collection<E>, ISearchableBy
 
 	@Override
 	public boolean contains(Object o) {
-		IContainerElement<E> head = this.firstElement;
-		while(head.hasNextElement()) {
-			if(head.getData().equals(o)) {
-				return true;
-			} else {
-				head = head.getNextElement();
+		if(this.firstElement != null) {
+			IContainerElement<E> head = this.firstElement;
+			while(head.hasNextElement()) {
+				if(head.getData().equals(o)) {
+					return true;
+				} else {
+					head = head.getNextElement();
+				}
 			}
-		}
-		//check last position
-		if(head.getData().equals(o))
+			//check last position
+			if(head.getData().equals(o))
+				return true;
+			return false;
+		} else if(o == null && this.firstElement == null) {
 			return true;
+		}
 		return false;
 	}
 
@@ -91,18 +96,21 @@ public class Container<E> extends Object implements Collection<E>, ISearchableBy
 	}
 	
 	public E get(int index) throws IndexOutOfBoundsException {
-		IContainerElement<E> search = this.firstElement;
-		int size = this.size();
-
-		if(index < 0 || index > size-1)
-			throw new IndexOutOfBoundsException();
-		
-		// get element at index
-		for(int i = 0; i < index; ++i) {
-			search = search.getNextElement();
+		if(this.firstElement != null) {
+			IContainerElement<E> search = this.firstElement;
+			int size = this.size();
+	
+			if(index < 0 || index > size-1)
+				throw new IndexOutOfBoundsException();
+			
+			// get element at index
+			for(int i = 0; i < index; ++i) {
+				search = search.getNextElement();
+			}
+			
+			return search.getData();
 		}
-		
-		return search.getData();
+		return null;
 	}
 
 	@Override
@@ -131,26 +139,27 @@ public class Container<E> extends Object implements Collection<E>, ISearchableBy
 		if(o == null)
 			return false;
 		
-		IContainerElement<E> itr = this.firstElement;
-		
-		if(o.equals(itr.getData())) {
-			// set the first element to the next element. let garbage collection handle destruction
-			this.firstElement = this.firstElement.getNextElement();
-			return true;
-		}
-		
-		while(itr.hasNextElement()) {
-			IContainerElement<E> next = itr.getNextElement();
-			if(next != null) {
-				if(o.equals(next.getData())) {
-					itr.setNextElement(next.getNextElement());
-					next.setNextElement(null);
-					return true;
-				}
+		if(this.firstElement != null) {
+			IContainerElement<E> itr = this.firstElement;
+			
+			if(o.equals(itr.getData())) {
+				// set the first element to the next element. let garbage collection handle destruction
+				this.firstElement = this.firstElement.getNextElement();
+				return true;
 			}
-			itr = itr.getNextElement();
+			
+			while(itr.hasNextElement()) {
+				IContainerElement<E> next = itr.getNextElement();
+				if(next != null) {
+					if(o.equals(next.getData())) {
+						itr.setNextElement(next.getNextElement());
+						next.setNextElement(null);
+						return true;
+					}
+				}
+				itr = itr.getNextElement();
+			}
 		}
-		
 		return false;
 	}
 

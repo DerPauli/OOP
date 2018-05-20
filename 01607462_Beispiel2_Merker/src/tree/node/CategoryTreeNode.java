@@ -4,6 +4,11 @@
  */
 package tree.node;
 
+import java.util.Collection;
+
+import container.Container;
+import domain.product.IProduct;
+
 public class CategoryTreeNode<NODETYPE,CATEGORY> extends GenericTreeNode<NODETYPE> {
 
 	private CATEGORY category;
@@ -27,7 +32,14 @@ public class CategoryTreeNode<NODETYPE,CATEGORY> extends GenericTreeNode<NODETYP
 	}
 	
 	public CategoryTreeNode<NODETYPE,CATEGORY> deepCopy() {
-		return (CategoryTreeNode<NODETYPE, CATEGORY>) super.deepCopy();
+		CategoryTreeNode<NODETYPE, CATEGORY> ret = new CategoryTreeNode<NODETYPE, CATEGORY>(this.getCategory());
+		Collection<CategoryTreeNode<NODETYPE, CATEGORY>> children = new Container<CategoryTreeNode<NODETYPE, CATEGORY>>();
+		
+		for(ITreeNode<NODETYPE> node : super.getChildren()) {
+			children.add((CategoryTreeNode<NODETYPE, CATEGORY>) node.deepCopy());
+		}
+		ret.getChildren().addAll(children);
+		return ret;
 	}
 	
 }
