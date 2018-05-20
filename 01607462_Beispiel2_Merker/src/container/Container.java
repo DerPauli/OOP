@@ -1,3 +1,7 @@
+/**
+ * @author Paul Merker
+ * @matrNr 01607462
+ */
 package container;
 
 import java.util.ArrayList;
@@ -23,7 +27,7 @@ public class Container<E> extends Object implements Collection<E>, ISearchableBy
 		
 		IContainerElement<E> it = this.firstElement;
 		while(it.hasNextElement()) {
-			if(filter.searchFilterFunction(it, compareObject))
+			if(filter.searchFilterFunction(it.getData(), compareObject))
 				ret.add(it.getData());
 			
 			it = it.getNextElement();
