@@ -1,3 +1,7 @@
+/**
+ * @author Paul Merker
+ * @matrNr 01607462
+ */
 package tree.node;
 
 public class CategoryTreeNode<NODETYPE,CATEGORY> extends GenericTreeNode<NODETYPE> {

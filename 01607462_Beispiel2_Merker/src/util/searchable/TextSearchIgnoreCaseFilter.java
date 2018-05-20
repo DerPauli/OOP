@@ -1,3 +1,7 @@
+/**
+ * @author Paul Merker
+ * @matrNr 01607462
+ */
 package util.searchable;
 
 public class TextSearchIgnoreCaseFilter extends Object implements ISearchFilter {

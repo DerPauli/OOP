@@ -1,3 +1,7 @@
+/**
+ * @author Paul Merker
+ * @matrNr 01607462
+ */
 package tree.node;
 
 import java.util.Collection;

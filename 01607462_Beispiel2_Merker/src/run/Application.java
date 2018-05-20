@@ -1,3 +1,7 @@
+/**
+ * @author Paul Merker
+ * @matrNr 01607462
+ */
 package run;
 
 import java.util.ArrayList;
@@ -13,6 +17,7 @@ import domain.product.SimpleProduct;
 import tree.GenericTree;
 import tree.node.GenericTreeNode;
 import tree.node.ITreeNode;
+import util.searchable.ProductNameFilter;
 
 public class Application {
 
@@ -29,6 +34,15 @@ public class Application {
 		meta.add(new ExtendedProduct("ExTest", 10.234f));
 		
 		prods.addAll(meta);
+		prods.add(new SimpleProduct("SimpleTest2", 12.50f));
+		
+		ProductNameFilter filter = new ProductNameFilter();
+
+		for(IProduct element : prods.searchByFilter(filter, new Integer(12))) {
+			System.out.println("Hit");
+		}
+		
+		
 		
 		
 		/***
@@ -79,7 +93,7 @@ public class Application {
 			System.out.println(node.nodeValue());
 		}
 		System.out.println(numTree.generateConsoleView("_"));
-		System.out.println(numTree.getRoot().generateConsoleView("_", "__"));
+		//System.out.println(numTree.getRoot().generateConsoleView("_", "__"));
 	}
 
 }

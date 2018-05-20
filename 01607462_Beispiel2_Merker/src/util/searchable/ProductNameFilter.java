@@ -1,6 +1,10 @@
+/**
+ * @author Paul Merker
+ * @matrNr 01607462
+ */
 package util.searchable;
 
-import domain.product.Product;
+import domain.product.IProduct;
 
 public class ProductNameFilter extends Object implements ISearchFilter {
 
@@ -11,19 +15,19 @@ public class ProductNameFilter extends Object implements ISearchFilter {
 		if(originalObject == null || compareObject == null)
 			return false;
 		
-		if(originalObject instanceof Product) {
-			if(compareObject instanceof Product) {
+		if(originalObject instanceof IProduct) {
+			if(compareObject instanceof IProduct) {
 				// both products
-				return (((Product) originalObject).getName() == ((Product) compareObject).getName()) ? true : false;
+				return (((IProduct) originalObject).getName() == ((IProduct) compareObject).getName()) ? true : false;
 			} else {
 				// original product compare object
-				return (compareObject.toString().equalsIgnoreCase(((Product) originalObject).getName())) ? true : false;
+				return (compareObject.toString().equalsIgnoreCase(((IProduct) originalObject).getName())) ? true : false;
 			}
 			
 		} else {
-			if(compareObject instanceof Product) {
+			if(compareObject instanceof IProduct) {
 				// original object compare product
-				return (originalObject.toString().equalsIgnoreCase(((Product) compareObject).getName())) ? true : false;
+				return (originalObject.toString().equalsIgnoreCase(((IProduct) compareObject).getName())) ? true : false;
 			} else {
 				// both objects
 				return (originalObject.toString().equalsIgnoreCase(compareObject.toString())) ? true : false;
