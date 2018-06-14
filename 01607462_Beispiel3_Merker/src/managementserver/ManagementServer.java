@@ -2,15 +2,22 @@ package managementserver;
 
 import java.util.Collection;
 
+import cashregister.CashRegister;
 import cashregister.ICashRegister;
 import cashregister.IObserver;
+import cashregister.NotRegisteredException;
 import container.Container;
 import domain.product.IProduct;
+import domain.product.JointProduct;
 import domain.product.ProductCategory;
 import tree.ITree;
 import tree.ProductTree;
 import tree.node.CategoryTreeNode;
+import tree.node.GenericTreeNode;
+import tree.node.ITreeNode;
 import tree.node.ProductCategoryTreeNode;
+import tree.node.ProductTreeNode;
+import util.searchable.ProductNameFilter;
 import warehouse.IWarehouseListener;
 
 public class ManagementServer extends Object implements IManagementServer,
@@ -46,19 +53,32 @@ public class ManagementServer extends Object implements IManagementServer,
 	
 	@Override
 	public ITree<IProduct> getChanges() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.productAssortment.deepCopy();
 	}
 
 	@Override
 	public boolean register(IObserver obs) {
-		// TODO Auto-generated method stub
+		if(obs != null) {
+			if(this.observer.contains(obs)) {
+				obs.activateNotifications(this);
+				obs.notifyChange(this);
+				return false;
+			} else {
+				obs.activateNotifications(this);
+				obs.notifyChange(this);
+				this.observer.add(obs);
+				return true;
+			}
+		}
 		return false;
 	}
 
 	@Override
 	public boolean unregister(IObserver obs) {
-		// TODO Auto-generated method stub
+		if(obs != null) {
+			obs.deactivateNotifications(this);
+			return this.observer.remove(obs);
+		}
 		return false;
 	}
 
@@ -68,6 +88,7 @@ public class ManagementServer extends Object implements IManagementServer,
 		// check if cashRegister is deriverative of IObserver
 		// https://stackoverflow.com/a/12145210/8641285
 		if(IObserver.class.isAssignableFrom(cashRegister.getClass())) {
+			((IObserver)cashRegister).notifyChange(this);
 			this.register((IObserver)cashRegister);
 		}
 		
@@ -75,50 +96,93 @@ public class ManagementServer extends Object implements IManagementServer,
 
 	@Override
 	public void propagateProducts() {
-		// TODO Auto-generated method stub
-		
+		for(IObserver obs : this.observer) {
+			obs.notifyChange(this);
+		}
 	}
 
 	@Override
 	public ITree<IProduct> retrieveProductSortiment() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.productAssortment.deepCopy();
 	}
 
 	@Override
-	public ICashRegister retrieveRegisteredCashRegister(Long cashRegisterId) {
-		// TODO Auto-generated method stub
+	public ICashRegister retrieveRegisteredCashRegister(Long cashRegisterId) throws NotRegisteredException {
+		for(ICashRegister reg : this.cashRegisters) {
+			if(reg.getID() == cashRegisterId)
+				return reg;
+		}
 		return null;
 	}
 
 	@Override
 	public Collection<ICashRegister> retrieveRegisteredCashRegisters() {
-		// TODO Auto-generated method stub
-		return null;
+		return this.cashRegisters;
 	}
 
 	@Override
-	public void unregisterCashRegister(ICashRegister cashRegister) {
-		// TODO Auto-generated method stub
-		
+	public void unregisterCashRegister(ICashRegister cashRegister) throws NotRegisteredException {
+		// check if cashRegister is deriverative of IObserver
+		// https://stackoverflow.com/a/12145210/8641285
+		if(IObserver.class.isAssignableFrom(cashRegister.getClass())) {
+			this.register((IObserver)cashRegister);
+		}
+		this.cashRegisters.remove(cashRegister);
 	}
 
 	@Override
-	public void notifyChange(IProduct arg0) {
-		// TODO Auto-generated method stub
+	public void notifyChange(IProduct object) {
 		
+		if(this.productAssortment.findNode(object) != null) {
+			ProductNameFilter filt = new ProductNameFilter();
+			
+			if(object instanceof JointProduct) {
+				Collection<ITreeNode<IProduct>> joints = this.productAssortment.searchByFilter(filt, object);
+				
+				for(ITreeNode<IProduct> j : joints) {
+					for(IProduct p : ((JointProduct)object).getProducts()) {
+						if(j.findNodeByValue(p) == null) {
+							j.getChildren().add(new ProductTreeNode(p));
+						}
+					}
+				}
+				return;
+			} else {
+				for(ITreeNode<IProduct> categories : this.productAssortment.getRoot().getChildren()) {
+					for(ITreeNode<IProduct> c : categories.getChildren()) {
+						
+						if(c.checkNodeByValue(object)) {
+							if(categories.getLabel().equals(object.getCategory().toString())) {
+								c.nodeValue().setPrice(object.getPrice());
+							} else {
+								if(this.productAssortment.removeNode(c)) {
+									this.productAdded(object);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
 	}
 
 	@Override
-	public void productAdded(IProduct arg0) {
-		// TODO Auto-generated method stub
+	public void productAdded(IProduct product) {
+		Collection<ITreeNode<IProduct>> nodes = this.productAssortment.getRoot().getChildren();
+		ProductTreeNode elem = new ProductTreeNode(product);
 		
+		for(ITreeNode<IProduct> node : nodes) {
+			if(ProductCategory.valueOf(node.getLabel().toUpperCase()).equals(product.getCategory())) {
+				node.getChildren().add(elem);
+			}
+		}
 	}
-
+	
 	@Override
-	public void productRemoved(IProduct arg0) {
-		// TODO Auto-generated method stub
-		
+	public void productRemoved(IProduct product) {
+		while(this.productAssortment.getRoot().findNodeByValue(product) != null) {
+			this.productAssortment.getRoot().removeNodeByValue(product);
+		}
 	}
 
 }
