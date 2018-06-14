@@ -32,20 +32,37 @@ public class CashRegister extends Object implements ICashRegister, IObserver {
 
 	@Override
 	public void notifyChange(ISubjectManagementServer subject) {
-		// TODO Auto-generated method stub
+		for(Tuple<ISubjectManagementServer, Boolean> tup : this.subjects) {
+			if(tup.getValueA().equals(subject) && tup.getValueB().equals(true)) {
+				// subject matches and is activated
+				// override tree with new information
+				this.products = subject.getChanges();
+			}
+		}
 		
 	}
 
 	@Override
 	public void deactivateNotifications(ISubjectManagementServer subject) {
-		// TODO Auto-generated method stub
-		
+		for(Tuple<ISubjectManagementServer, Boolean> tup : this.subjects) {
+			if(tup.getValueA().equals(subject)) {
+				// subject is observed, deactivate
+				tup.setValueB(false);
+			}
+			// otherwise do nothing
+		}
 	}
 
 	@Override
 	public void activateNotifications(ISubjectManagementServer subject) {
-		// TODO Auto-generated method stub
-		
+		for(Tuple<ISubjectManagementServer, Boolean> tup : this.subjects) {
+			if(tup.getValueA().equals(subject)) {
+				// subject is observed, activate notification
+				tup.setValueB(true);
+				return;
+			}
+		}
+		this.subjects.add(new Tuple<ISubjectManagementServer, Boolean>(subject, true));
 	}
 
 	@Override
@@ -63,10 +80,9 @@ public class CashRegister extends Object implements ICashRegister, IObserver {
 
 	@Override
 	public Long addShoppingCart() {
-		long idx = this.id+1;
-		IShoppingCart newCart = new ShoppingCart(idx);
+		IShoppingCart newCart = ShoppingCartFactory.createShoppingCart();
 		this.shoppingCarts.add(newCart);
-		return idx;
+		return newCart.getShoppingCartID();
 		
 	}
 
@@ -95,8 +111,7 @@ public class CashRegister extends Object implements ICashRegister, IObserver {
 	@Override
 	public void displayShoppingCarts() {
 		for(ICashRegisterUI ui: this.uis)
-			for(IShoppingCart cart : this.shoppingCarts)
-				ui.displayShoppingCart(cart);
+			ui.displayShoppingCarts(this.shoppingCarts);
 	}
 
 	@Override
@@ -111,6 +126,7 @@ public class CashRegister extends Object implements ICashRegister, IObserver {
 
 	@Override
 	public IInvoice payShoppingCart(long id, IPayment provider) throws ShoppingCartNotFoundException {
+		// implement behaviour according diagram
 		IShoppingCart cart = this.findShoppingCartById(id);
 		if(cart != null) {
 			if(cart.getShoppingCartID().equals(id)) {
@@ -118,11 +134,21 @@ public class CashRegister extends Object implements ICashRegister, IObserver {
 				IShoppingCart sel = cart;
 				IInvoice inv = new Invoice();
 				
-				inv.setInvoiceProducts(sel.currentElements());
+				// copy all elements
+				Collection<IShoppingCartElement> copied = new Container();
+				for(IShoppingCartElement el : sel.currentElements())
+					copied.add(el.deepCopy());
+				
+				inv.setInvoiceProducts(copied);
 				
 				for(IShoppingCartElement el : sel.currentElements()) {
 					inv.addPaymentTransaction(provider.pay(el.getPrice()));
 				}
+				
+				// remove all elements which have been processed
+				for(IShoppingCartElement el : sel.currentElements())
+					sel.removeElement(el);
+				
 				this.records.add(inv);
 				return inv;
 			}
@@ -163,7 +189,7 @@ public class CashRegister extends Object implements ICashRegister, IObserver {
 	}
 	
 	protected IShoppingCart findShoppingCartById(Long id) {
-		for(IShoppingCart cart : this.getShoppingCarts()) {
+		for(IShoppingCart cart : this.shoppingCarts) {
 			if(cart.getShoppingCartID().equals(id)) {
 				return cart;
 			}
