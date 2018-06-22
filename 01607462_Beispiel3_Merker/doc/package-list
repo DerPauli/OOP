@@ -1,0 +1,15 @@
+cashregister
+cashregister.ui
+container
+domain.copy
+domain.product
+domain.record
+managementserver
+managementtools
+paymentprovider
+tree
+tree.node
+util
+util.searchable
+warehouse
+warehouse.ui
