@@ -1,3 +1,8 @@
+/**
+ * @author Paul Merker
+ * @matrNr 01607462
+ */
+
 import cashregister.CashRegisterFactory;
 import cashregister.ICashRegister;
 import cashregister.ui.CashRegisterConsoleUI;
