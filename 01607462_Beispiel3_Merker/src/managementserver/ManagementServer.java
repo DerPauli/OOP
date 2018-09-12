@@ -1,3 +1,8 @@
+/**
+ * @author Paul Merker
+ * @matrNr 01607462
+ */
+
 package managementserver;
 
 import java.util.Collection;

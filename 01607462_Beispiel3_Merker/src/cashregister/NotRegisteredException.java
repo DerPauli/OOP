@@ -1,3 +1,8 @@
+/**
+ * @author Paul Merker
+ * @matrNr 01607462
+ */
+
 package cashregister;
 
 public class NotRegisteredException extends Exception {
